@@ -1,0 +1,27 @@
+version: '3.4'
+services:
+  docker-name-in-docker-compose:
+    image: docker-name-in-docker-compose:0.0.1
+    build:
+      context: .
+    command: <cmd>
+    environment:
+      - PORT=<port>
+    restart: always
+
+  production-nginx-container:
+    container_name: 'production-nginx-container'
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./letsencrypt-docker-nginx/src/production/production.conf:/etc/nginx/conf.d/default.conf
+      - ./letsencrypt-docker-nginx/src/production/production-site:/usr/share/nginx/html
+      - ./letsencrypt-docker-nginx/src/production/dh-param/dhparam-2048.pem:/etc/ssl/certs/dhparam-2048.pem
+      - /docker-volumes/etc/letsencrypt/live/<fillme-my-domain>/fullchain.pem:/etc/letsencrypt/live/<fillme-my-domain>/fullchain.pem
+      - /docker-volumes/etc/letsencrypt/live/<fillme-my-domain>/privkey.pem:/etc/letsencrypt/live/<fillme-my-domain>/privkey.pem
+    depends_on:
+      - docker-name-in-docker-compose
+    links:
+      - docker-name-in-docker-compose
